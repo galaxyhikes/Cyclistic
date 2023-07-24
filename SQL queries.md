@@ -205,25 +205,21 @@ WITH year_data AS(
 		started_at <= ended_at			 --- addition to original temporary table query
 	)
 
---- Check 2: Determine if there are non-unique ride ids. This yielded 1 result with 27 rows of data with the ride id 0E+00. Thus this ride id will be excluded in the annual data table with the following clause: WHERE ride_id != "0E+00"
+--- Check 2: Determine if there are non-unique ride ids
 SELECT ride_id, COUNT(ride_id)
 FROM year_data
 GROUP BY ride_id
 HAVING COUNT(ride_id) > 1
 
---- Check 3: Determine the types of bikes. This yielded 3 distinct results: electric_bike, classic_bike and docked_bike
-SELECT DISTINCT rideable_type
-FROM year_data
-
---- Check 4: Determine the types of membership. This yielded 2 distinct results: casual, member
+--- Check 3: Determine the types of membership
 SELECT DISTINCT member_casual
 FROM year_data
 
---- Check 5: Determine the earliest and latest start time and date of bike usage, to ensure the data in the table is within the timeframe Mar 2022 - Feb 2023. Earliest date was 1/3/22 and latest was 28/2/23
+--- Check 4: Determine the earliest and latest start time and date of bike usage
 SELECT MIN(started_at), MAX(started_at)
 FROM year_data
 
---- Check 6: Check for invalid values of start/end date and time. Query is repeated for column 'ended_at'
+--- Check 5: Check for invalid values of start/end date and time. Query is repeated for column 'ended_at'.
 SELECT *
 FROM year_data
 WHERE started_at NOT BETWEEN (
@@ -233,7 +229,7 @@ WHERE started_at NOT BETWEEN (
 	SELECT MAX(started_at)
 	FROM year_data)
 
---- Check 7: Determine if the minimum and maximum longitude and latitude geographical coordinates are within the allowable ranges. Latitude results were within -90 to +90 degrees, and longitude results were within -180 to +180 degrees
+--- Check 6: Check for invalid geographical coordinates
 SELECT
 	MIN(start_lat) AS min_start_lat,
 	MAX(start_lat) AS max_start_lat,
@@ -245,12 +241,15 @@ SELECT
 	MAX(end_lng) AS max_end_lng
 FROM year_data
 
---- Check 8: Determine if station names and IDs are unique. Results revealed distinct station names > station IDs, thus station IDs are not unique, so station names will be used for subsequent analyses
+--- Check 7: Determine if station names and IDs are unique. 
 SELECT 
 	COUNT (DISTINCT start_station_name),
 	COUNT (DISTINCT start_station_id),
 	COUNT (DISTINCT end_station_name),
 	COUNT (DISTINCT end_station_id)
-FROM cyclistic.year_data
+FROM year_data
 
+--- Check 8: Determine the types of bikes
+SELECT DISTINCT rideable_type
+FROM year_data
 ```
