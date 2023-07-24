@@ -252,4 +252,25 @@ FROM year_data
 --- Check 8: Determine the types of bikes
 SELECT DISTINCT rideable_type
 FROM year_data
+
+--- Shortlisting the unique station names from both starting and end locations with 'docked bikes'. Result table was saved as 'docked_unique'
+SELECT *
+FROM (
+	SELECT
+		DISTINCT start_station_name AS station_name, 
+		start_lat AS lat, 
+		start_lng AS lng
+	FROM year_data
+	WHERE rideable_type = 'docked_bike'
+	)
+UNION DISTINCT
+SELECT *
+FROM (
+	SELECT
+		DISTINCT end_station_name, 
+		end_lat, 
+		end_lng
+	FROM year_data
+	WHERE rideable_type = 'docked_bike'
+	)
 ```
