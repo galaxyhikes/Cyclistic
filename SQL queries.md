@@ -130,7 +130,7 @@ SELECT *
 FROM cyclistic.year_started_more
 WHERE started_at > ended_at
 ```
-### Refining temporary table query
+### Checking and refining of temporary table
 
 ```sql
 --- Temporary table query draft 2 with VALID timestamp data
@@ -253,7 +253,7 @@ FROM year_data
 SELECT DISTINCT rideable_type
 FROM year_data
 
---- Shortlisting the unique station names from both starting and end locations with 'docked bikes'. Result table was saved as 'docked_unique'
+--- Shortlisting the unique station names from both starting and end locations with 'docked bikes'. Results table was saved as 'docked_unique'
 SELECT *
 FROM (
 	SELECT
@@ -273,4 +273,36 @@ FROM (
 	FROM year_data
 	WHERE rideable_type = 'docked_bike'
 	)
+
+--- Replacing 'docked_bikes' with 'classic_bikes'. Table was saved as 'nil_docked' for further checks
+SELECT
+	ride_id,
+	started_at,
+	ended_at,
+	start_station_name,
+	end_station_name,
+	start_lat,
+	start_lng,
+	end_lat,
+	end_lng,
+	CASE WHEN rideable_type = 'docked_bike' THEN 'classic_bike'
+	WHEN rideable_type = 'electric_bike' THEN 'electric_bike'
+	ELSE 'classic_bike'
+	END AS rideable_type,
+	member_casual
+FROM year_data
+
+--- Check if there only exists 2 bike types in table 'nil_docked'. Result set yielded 1658093 trips with electric and 2839778 with classic bikes
+SELECT 
+	rideable_type,
+	COUNT (ride_id)
+FROM cyclistic.nil_docked
+GROUP BY rideable_type
+
+--- 
+SELECT 
+	rideable_type,
+	COUNT (ride_id)
+FROM year_data
+GROUP BY rideable_type
 ```
