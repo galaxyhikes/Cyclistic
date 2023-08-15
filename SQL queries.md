@@ -346,4 +346,89 @@ SELECT
 FROM cyclistic.year_data_new
 WHERE trip_min >= 1
 GROUP BY member_casual
+
+--- Analysis 3: Bike preference
+SELECT
+	member_casual,
+	rideable_type,
+	COUNT(ride_id) AS num_trips
+FROM cyclistic.year_data_new
+WHERE trip_min >= 1
+GROUP BY member_casual, rideable_type
+
+--- Analysis 4a: Trips taken on monthly basis
+SELECT 
+	member_casual,
+	COUNT(ride_id) AS num_trips,
+	CONCAT(FORMAT_TIMESTAMP('%b', started_at), ' ', EXTRACT(YEAR FROM started_at)) AS month_year
+FROM cyclistic.year_data_new
+WHERE trip_min >= 1 
+GROUP BY member_casual, month_year
+ORDER BY month_year
+
+--- Analysis 4b: Trips taken on weekly basis
+SELECT 
+	member_casual,
+	COUNT(ride_id) AS num_trips,
+	FORMAT_TIMESTAMP('%A', started_at) AS day_week
+FROM cyclistic.year_data_new
+WHERE trip_min >= 1 
+GROUP BY member_casual, day_week
+ORDER BY day_week
+
+--- Analysis 4c: Trips taken on hourly basis
+SELECT 
+	member_casual,
+	COUNT(ride_id) AS num_trips,
+	EXTRACT(HOUR FROM started_at) AS hour,
+FROM cyclistic.year_data_new
+WHERE trip_min >= 1
+GROUP BY member_casual, hour
+ORDER BY hour
+
+--- Analysis 5a: Initial duration analysis of trips taken (overall)
+SELECT
+	member_casual,
+	MIN(trip_min) AS min_trip,
+	MAX(trip_min) AS max_trip,
+	AVG(trip_min) AS avg_trip,
+	APPROX_QUANTILES(trip_min, 2)[OFFSET(1)] AS median_trip,
+	rideable_type
+FROM cyclistic.year_data_new
+WHERE trip_min >= 1
+GROUP BY member_casual, rideable_type
+
+--- Analysis 5b: Refined duration analysis of trips taken (overall)
+SELECT
+	member_casual,
+	MIN(trip_min) AS min_trip,
+	MAX(trip_min) AS max_trip,
+	AVG(trip_min) AS avg_trip,
+	APPROX_QUANTILES(trip_min, 2)[OFFSET(1)] AS median_trip,
+	rideable_type
+FROM cyclistic.year_data_new
+WHERE trip_min BETWEEN 1 AND 1440
+GROUP BY member_casual, rideable_type
+
+--- Analysis 5c: Refined duration analysis of trips taken on a weekly basis
+SELECT
+	member_casual,
+	AVG(trip_min) AS avg_trip,
+	APPROX_QUANTILES(trip_min, 2)[OFFSET(1)] AS median_trip,
+	FORMAT_TIMESTAMP('%A', started_at) AS day_week,
+	rideable_type
+FROM cyclistic.year_data_new
+WHERE trip_min BETWEEN 1 AND 1440
+GROUP BY member_casual, rideable_type, day_week
+
+--- Analysis 5d: Refined duration analysis of trips taken on an hourly basis
+SELECT
+	member_casual,
+	AVG(trip_min) AS avg_trip,
+	APPROX_QUANTILES(trip_min, 2)[OFFSET(1)] AS median_trip,
+	EXTRACT(HOUR FROM started_at) AS hour,
+	rideable_type
+FROM cyclistic.year_data_new
+WHERE trip_min BETWEEN 1 AND 1440
+GROUP BY member_casual, rideable_type, hour
 ```
