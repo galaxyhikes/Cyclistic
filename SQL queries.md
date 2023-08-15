@@ -339,5 +339,11 @@ WHERE
 GROUP BY member_casual, rideable_type
 ORDER BY member_casual
 
---- 
+--- Analysis 2: Rider proportion
+SELECT 
+	member_casual,
+	COUNT (ride_id) AS num_trips
+FROM cyclistic.year_data_new
+WHERE trip_min >= 1
+GROUP BY member_casual
 ```
