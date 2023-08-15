@@ -338,4 +338,6 @@ WHERE
 	trip_min < 1
 GROUP BY member_casual, rideable_type
 ORDER BY member_casual
+
+--- 
 ```
