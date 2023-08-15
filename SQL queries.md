@@ -299,10 +299,43 @@ SELECT
 FROM cyclistic.nil_docked
 GROUP BY rideable_type
 
---- 
+--- Check if the records containing 'docked_bike'  was accounted towards 'classic_bike'. Result set yielded 176402 trips with docked bikes and 2663376 with classic bikes in the original temporart table year_data, corresponding to the total count with classic bikes in updated table above
 SELECT 
 	rideable_type,
 	COUNT (ride_id)
 FROM year_data
 GROUP BY rideable_type
+
+--- Further refinement of temporary table query with new column on trip duration and updated bike types. Table generated was then saved as a permanent table
+SELECT
+	ride_id,
+	started_at,
+	ended_at,
+	ROUND(TIMESTAMP_DIFF(ended_at, started_at, SECOND)/60,2) AS trip_min,
+	start_station_name,
+	end_station_name,
+	start_lat,
+	start_lng,
+	end_lat,
+	end_lng,
+	CASE WHEN rideable_type = 'docked_bike' THEN 'classic_bike'
+	WHEN rideable_type = 'electric_bike' THEN 'electric_bike'
+	ELSE 'classic_bike'
+	END AS rideable_type,
+	member_casual
+FROM year_data
+```
+
+### Data analysis
+```sql
+--- Analysis 1: False starts
+SELECT
+	member_casual,
+	rideable_type,
+	COUNT(ride_id) AS num_trips
+FROM cyclistic.year_data_new
+WHERE
+	trip_min < 1
+GROUP BY member_casual, rideable_type
+ORDER BY member_casual
 ```
