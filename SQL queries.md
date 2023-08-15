@@ -431,4 +431,53 @@ SELECT
 FROM cyclistic.year_data_new
 WHERE trip_min BETWEEN 1 AND 1440
 GROUP BY member_casual, rideable_type, hour
+
+--- Analysis 5 extension: Calculating the proportion of casual riders riding >20 minutes (34.4%)
+SELECT
+	COUNTIF(trip_min BETWEEN 20 AND 1440) / COUNTIF(trip_min BETWEEN 1 AND 1440) AS proportion
+	FROM cyclistic.year_data_new
+WHERE member_casual = 'casual'
+
+--- Analysis 5 extension part 2: To justify majority of casual riders ride <=30 minutes on classic bike (74.6%)
+SELECT
+	COUNTIF(trip_min BETWEEN 1 AND 30) / COUNTIF(trip_min BETWEEN 1 AND 1440) AS proportion
+	FROM cyclistic.year_data_new
+WHERE member_casual = 'casual' AND rideable_type = 'classic_bike'
+
+--- Analysis 6: Station popularity; creating a temporary with all starting and ending stations combined
+WITH stations AS (
+	SELECT *
+	FROM (
+		SELECT
+			start_station_name AS station_name,
+			ride_id
+		FROM cyclistic.year_data_new
+		)
+	UNION ALL
+	SELECT *
+	FROM (
+		SELECT
+			end_station_name,
+			ride_id
+		FROM cyclistic.year_data_new
+		)
+)
+
+--- Finding the most popular stations for each user type by joining with table docked_unique. Same query is then repeated by replacing the WHERE clause with 'member'
+SELECT
+	d.lat,
+	d.lng,
+	s.station_pop,
+	s.station_name
+FROM (
+	SELECT
+		COUNT(ride_id) AS total_visit,
+		station_name
+	FROM stations
+	WHERE member_casual = 'casual'
+	GROUP BY station_name, station_name
+	ORDER BY station_pop DESC
+	LIMIT 50
+	) AS s
+JOIN cyclistic.docked_unique AS d ON s.station_name = d.station_name
 ```
